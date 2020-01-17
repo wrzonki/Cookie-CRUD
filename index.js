@@ -1,4 +1,4 @@
-var Cookie = {
+const Cookie = {
 
     timer: {
         'SECONDS':  1000,
@@ -28,17 +28,19 @@ var Cookie = {
         }
     },
 
-    set: function (name, value, timer, timerValue, domain, path) {
+    set: function (obj) {
         try {
-            if (!name || !value || !timer || !timerValue) {
+            if (!obj.name || !obj.value || !obj.timer || !obj.timerValue) {
                 throw new Error('Invalid function arguments.');
             }
             let date = new Date();
-            date.setTime(date.getTime() + (Cookie.timer[timer]) * timerValue);
-            var expires = "expires="+ date.toUTCString();
-            domain = domain !== undefined ? `;domain=${domain}` : '';
-            path = path !== undefined ? `;path=${path};` : '';
-            document.cookie = `${name}=${value};${expires}${domain}${path}`;
+            date.setTime(date.getTime() + (Cookie.timer[obj.timer]) * obj.timerValue);
+            let expires = "expires="+ date.toUTCString();
+            domain = obj.domain !== undefined ? `;domain=${obj.domain}` : '';
+            path = obj.path !== undefined ? `;path=${obj.path}` : '';
+            sameSite = obj.sameSite !== undefined ? `;SameSite=${obj.sameSite};` : `;SameSite=Lax;`;
+            secure = obj.secure !== undefined && obj.secure ? `;Secure` : '';
+            document.cookie = `${obj.name}=${obj.value};${expires}${domain}${path}${sameSite}${secure}`;
         } catch (error) {
             console.warn(error.stack);
         };
@@ -52,26 +54,46 @@ var Cookie = {
 /**
  * TESTY
  */
-console.table(Cookie.getAll());
 
-//set on domain and pathname
-Cookie.set('name1', 'value', 'DAYS', 2, '.pawel-wrzosek.pl', '/');
-console.log('name1: ', Cookie.exists('name1'));
+Cookie.set({
+    name: 'name1',
+    value: 'value',
+    timer: 'MINUTES',
+    timerValue: 200
+});
 
-//set on subdomain
-Cookie.set('name2', 'value', 'DAYS', 2, '.aaa.pawel-wrzosek.pl');
-console.log('name2: ', Cookie.exists('name2'));
+Cookie.set({
+    name: 'name2',
+    value: 'value',
+    timer: 'MINUTES',
+    timerValue: 200,
+    domain: 'github.com'
+});
 
+Cookie.set({
+    name: 'name3',
+    value: 'value',
+    timer: 'MINUTES',
+    timerValue: 200,
+    path: '/'
+});
 
-Cookie.set('name3', 'value', 'MINUTES', 200);
-console.log('name3: ', Cookie.exists('name3'));
+Cookie.set({
+    name: 'name4',
+    value: 'value',
+    timer: 'MINUTES',
+    timerValue: 200,
+    sameSite: 'Strict'
+});
 
-Cookie.set('name4', 'value', 'MINUTES', 200);
-console.log('name4: ', Cookie.exists('name4'));
+Cookie.set({
+    name: 'name5',
+    value: 'value',
+    timer: 'MINUTES',
+    timerValue: 200,
+    sameSite: 'None',
+    secure: true
+});
 
-console.table(Cookie.getAll());
-
-//delete
-Cookie.delete('name4');
-
-console.table(Cookie.getAll());
+Cookie.delete('name1');
+Cookie.getAll();
